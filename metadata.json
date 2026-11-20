@@ -1,0 +1,6 @@
+{
+  "name": "SpendWise",
+  "description": "Minimalist personal expense tracker and monthly financial analytics dashboard in Indian Rupees with LocalStorage persistence.",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}

@@ -1,0 +1,611 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SpendWise — Personal Expense Tracker</title>
+    <meta
+      name="description"
+      content="Minimalist personal expense tracker and monthly financial analytics dashboard in Indian Rupees with LocalStorage persistence."
+    />
+    <meta property="og:title" content="SpendWise — Personal Expense Tracker" />
+    <meta
+      property="og:description"
+      content="Track income, expenses, monthly analytics, and category breakdowns in Indian Rupees."
+    />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/src/styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <!-- Mobile Sidebar Backdrop -->
+      <div id="sidebar-backdrop" class="sidebar-backdrop" aria-hidden="true"></div>
+
+      <!-- Sidebar Navigation -->
+      <aside id="sidebar" class="sidebar" aria-label="Primary Navigation">
+        <div class="sidebar-brand">
+          <a href="#overview" class="brand-link" data-nav="overview">
+            <span class="brand-mark" aria-hidden="true">
+              <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1" />
+                <path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4" />
+              </svg>
+            </span>
+            <span class="brand-name">SpendWise</span>
+          </a>
+          <button
+            type="button"
+            id="close-sidebar-btn"
+            class="icon-btn mobile-only"
+            aria-label="Close navigation menu"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 6 6 18" />
+              <path d="m6 6 12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <nav class="sidebar-nav" aria-label="Dashboard sections">
+          <p class="sidebar-section-label">Workspace</p>
+          <button type="button" class="nav-item active" data-view="overview" aria-current="page">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect width="7" height="9" x="3" y="3" rx="1.5" />
+              <rect width="7" height="5" x="14" y="3" rx="1.5" />
+              <rect width="7" height="9" x="14" y="12" rx="1.5" />
+              <rect width="7" height="5" x="3" y="16" rx="1.5" />
+            </svg>
+            <span>Overview</span>
+          </button>
+
+          <button type="button" class="nav-item" data-view="transactions">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z" />
+              <path d="M8 7h8" />
+              <path d="M8 11h8" />
+              <path d="M8 15h5" />
+            </svg>
+            <span>Transactions</span>
+          </button>
+
+          <button type="button" class="nav-item" data-view="analytics">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M3 3v18h18" />
+              <path d="m19 9-5 5-4-4-3 3" />
+            </svg>
+            <span>Monthly Analytics</span>
+          </button>
+        </nav>
+
+        <div class="sidebar-footer">
+          <p class="sidebar-section-label">Data Controls</p>
+          <div class="sidebar-actions">
+            <button type="button" id="btn-export-csv" class="sidebar-action-btn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="7 10 12 15 17 10" />
+                <line x1="12" x2="12" y1="15" y2="3" />
+              </svg>
+              <span>Export CSV</span>
+            </button>
+
+            <button type="button" id="btn-load-demo" class="sidebar-action-btn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                <path d="M3 3v5h5" />
+              </svg>
+              <span>Load Demo Data</span>
+            </button>
+
+            <button type="button" id="btn-clear-all" class="sidebar-action-btn danger">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M3 6h18" />
+                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+              </svg>
+              <span>Clear All Data</span>
+            </button>
+          </div>
+          <p class="storage-note">Local browser storage · Indian Rupees (₹)</p>
+        </div>
+      </aside>
+
+      <!-- Main Workspace -->
+      <div class="main-wrapper">
+        <!-- Top Bar (3-zone contract: Breadcrumb — Period Selector — Primary CTA) -->
+        <header class="topbar">
+          <div class="topbar-left">
+            <button
+              type="button"
+              id="open-sidebar-btn"
+              class="icon-btn mobile-only"
+              aria-label="Open navigation menu"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="4" x2="20" y1="12" y2="12" />
+                <line x1="4" x2="20" y1="6" y2="6" />
+                <line x1="4" x2="20" y1="18" y2="18" />
+              </svg>
+            </button>
+            <div class="breadcrumb" aria-label="Current section">
+              <span class="breadcrumb-root">SpendWise</span>
+              <span class="breadcrumb-sep" aria-hidden="true">/</span>
+              <h1 id="page-title" class="breadcrumb-current">Overview</h1>
+            </div>
+          </div>
+
+          <div class="topbar-center">
+            <div class="period-select-wrap">
+              <svg class="period-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <rect width="18" height="18" x="3" y="4" rx="2" />
+                <line x1="16" x2="16" y1="2" y2="6" />
+                <line x1="8" x2="8" y1="2" y2="6" />
+                <line x1="3" x2="21" y1="10" y2="10" />
+              </svg>
+              <label for="global-month-select" class="sr-only">Filter dashboard by month</label>
+              <select id="global-month-select" class="period-select" aria-label="Filter by month">
+                <option value="all">All Months</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="topbar-right">
+            <button type="button" id="btn-open-add-modal" class="btn btn-primary">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M5 12h14" />
+                <path d="M12 5v14" />
+              </svg>
+              <span class="cta-label-full">Add Transaction</span>
+              <span class="cta-label-short" aria-hidden="true">Add</span>
+            </button>
+          </div>
+        </header>
+
+        <!-- Dynamic Viewport Content -->
+        <main class="main-content" id="main-content">
+          <!-- KPI Summary Strip -->
+          <section class="kpi-grid" aria-label="Financial summary">
+            <article class="kpi-card kpi-card-featured">
+              <div class="kpi-card-top">
+                <p class="kpi-label">Total Balance</p>
+                <span class="kpi-icon kpi-icon-emerald" aria-hidden="true">
+                  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1" />
+                    <path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4" />
+                  </svg>
+                </span>
+              </div>
+              <p id="kpi-balance" class="kpi-value tabular-nums">₹0.00</p>
+              <div class="kpi-foot">
+                <p id="kpi-balance-sub" class="kpi-sub">Net savings rate: 0%</p>
+                <div class="kpi-mini-track" aria-hidden="true">
+                  <div id="kpi-savings-bar" class="kpi-mini-fill" style="width: 0%"></div>
+                </div>
+              </div>
+            </article>
+
+            <article class="kpi-card">
+              <div class="kpi-card-top">
+                <p class="kpi-label">Total Income</p>
+                <span class="kpi-icon kpi-icon-income" aria-hidden="true">
+                  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M17 7 7 17" />
+                    <path d="M17 17H7V7" />
+                  </svg>
+                </span>
+              </div>
+              <p id="kpi-income" class="kpi-value kpi-positive tabular-nums">₹0.00</p>
+              <p id="kpi-income-sub" class="kpi-sub">0 income entries</p>
+            </article>
+
+            <article class="kpi-card">
+              <div class="kpi-card-top">
+                <p class="kpi-label">Total Expenses</p>
+                <span class="kpi-icon kpi-icon-expense" aria-hidden="true">
+                  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M7 17 17 7" />
+                    <path d="M7 7h10v10" />
+                  </svg>
+                </span>
+              </div>
+              <p id="kpi-expense" class="kpi-value kpi-negative tabular-nums">₹0.00</p>
+              <p id="kpi-expense-sub" class="kpi-sub">0 expense entries</p>
+            </article>
+
+            <article class="kpi-card">
+              <div class="kpi-card-top">
+                <p class="kpi-label">Transactions</p>
+                <span class="kpi-icon kpi-icon-neutral" aria-hidden="true">
+                  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 2v20" />
+                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+                  </svg>
+                </span>
+              </div>
+              <p id="kpi-count" class="kpi-value tabular-nums">0</p>
+              <p id="kpi-count-sub" class="kpi-sub">Across all categories</p>
+            </article>
+          </section>
+
+          <!-- VIEW 1: OVERVIEW -->
+          <section id="view-overview" class="view-section active" aria-label="Dashboard overview">
+            <!-- Charts Row -->
+            <div class="charts-grid">
+              <!-- Income vs Expenses Monthly Bar Chart -->
+              <article class="panel chart-panel">
+                <div class="panel-header">
+                  <div>
+                    <h2 class="panel-title">Income vs Expenses</h2>
+                    <p class="panel-subtitle">6-month cashflow trend · click a month to filter</p>
+                  </div>
+                  <div class="chart-legend" aria-label="Chart legend">
+                    <span class="legend-item">
+                      <span class="legend-swatch swatch-income" aria-hidden="true"></span>
+                      Income
+                    </span>
+                    <span class="legend-item">
+                      <span class="legend-swatch swatch-expense" aria-hidden="true"></span>
+                      Expenses
+                    </span>
+                    <span class="legend-item">
+                      <span class="legend-line" aria-hidden="true"></span>
+                      Net
+                    </span>
+                  </div>
+                </div>
+                <div id="overview-bar-chart" class="chart-container bar-chart-container"></div>
+              </article>
+
+              <!-- Category-wise Expense Breakdown -->
+              <article class="panel chart-panel">
+                <div class="panel-header">
+                  <div>
+                    <h2 class="panel-title">Expense Breakdown</h2>
+                    <p id="overview-donut-subtitle" class="panel-subtitle">Spending share by category</p>
+                  </div>
+                  <button type="button" class="text-link-btn" data-jump-view="analytics">
+                    <span>Analytics</span>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <path d="m9 18 6-6-6-6" />
+                    </svg>
+                  </button>
+                </div>
+                <div class="donut-layout">
+                  <div id="overview-donut-chart" class="donut-svg-wrap"></div>
+                  <div id="overview-category-list" class="category-mini-list"></div>
+                </div>
+              </article>
+            </div>
+
+            <!-- Recent Transactions Card List -->
+            <article class="panel">
+              <div class="panel-header">
+                <div>
+                  <h2 class="panel-title">Recent Transactions</h2>
+                  <p id="recent-subtitle" class="panel-subtitle">Latest activity for the selected period</p>
+                </div>
+                <button type="button" class="text-link-btn" data-jump-view="transactions">
+                  <span>View all</span>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="m9 18 6-6-6-6" />
+                  </svg>
+                </button>
+              </div>
+              <div id="overview-recent-container"></div>
+            </article>
+          </section>
+
+          <!-- VIEW 2: TRANSACTIONS LEDGER -->
+          <section id="view-transactions" class="view-section" aria-label="Transactions ledger" hidden>
+            <article class="panel">
+              <div class="panel-header transactions-header">
+                <div>
+                  <h2 class="panel-title">All Transactions</h2>
+                  <p id="ledger-count-summary" class="panel-subtitle">Showing 0 transactions</p>
+                </div>
+                <div class="segmented-control" role="group" aria-label="Filter by transaction type">
+                  <button type="button" class="seg-btn active" data-type-filter="all">All</button>
+                  <button type="button" class="seg-btn" data-type-filter="income">Income</button>
+                  <button type="button" class="seg-btn" data-type-filter="expense">Expense</button>
+                </div>
+              </div>
+
+              <!-- Search & Filter Toolbar -->
+              <div class="filter-toolbar">
+                <div class="search-field">
+                  <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <circle cx="11" cy="11" r="8" />
+                    <path d="m21 21-4.3-4.3" />
+                  </svg>
+                  <input
+                    type="search"
+                    id="filter-search"
+                    class="input-control search-input"
+                    placeholder="Search description, category, or note..."
+                    aria-label="Search transactions"
+                  />
+                </div>
+
+                <div class="filter-controls">
+                  <select id="filter-category" class="input-control select-control" aria-label="Filter by category">
+                    <option value="all">All Categories</option>
+                  </select>
+
+                  <select id="filter-sort" class="input-control select-control" aria-label="Sort transactions">
+                    <option value="date-desc">Newest First</option>
+                    <option value="date-asc">Oldest First</option>
+                    <option value="amount-desc">Highest Amount</option>
+                    <option value="amount-asc">Lowest Amount</option>
+                  </select>
+
+                  <button type="button" id="btn-reset-filters" class="btn btn-secondary" hidden>
+                    Reset
+                  </button>
+                </div>
+              </div>
+
+              <!-- Filtered Totals Strip -->
+              <div id="filtered-summary-bar" class="filtered-summary-bar">
+                <span id="filtered-meta-text">0 matching records</span>
+                <span class="filtered-amounts tabular-nums">
+                  <span id="filtered-net-text">Net: ₹0.00</span>
+                </span>
+              </div>
+
+              <!-- Responsive Transaction Cards / Ledger Container -->
+              <div id="transactions-table-container"></div>
+            </article>
+          </section>
+
+          <!-- VIEW 3: MONTHLY ANALYTICS -->
+          <section id="view-analytics" class="view-section" aria-label="Monthly analytics" hidden>
+            <!-- Analytical Insights Row -->
+            <div class="insights-grid">
+              <article class="panel insight-card">
+                <div class="kpi-card-top">
+                  <p class="kpi-label">Savings Rate</p>
+                  <span class="kpi-icon kpi-icon-emerald" aria-hidden="true">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M12 20V10" />
+                      <path d="M18 20V4" />
+                      <path d="M6 20v-4" />
+                    </svg>
+                  </span>
+                </div>
+                <p id="analytics-savings-rate" class="insight-value tabular-nums">0.0%</p>
+                <p id="analytics-savings-desc" class="kpi-sub">Share of income retained</p>
+                <div class="ratio-bar-track" aria-hidden="true">
+                  <div id="analytics-savings-bar" class="ratio-bar-fill" style="width: 0%"></div>
+                </div>
+              </article>
+
+              <article class="panel insight-card">
+                <div class="kpi-card-top">
+                  <p class="kpi-label">Top Expense Category</p>
+                  <span class="kpi-icon kpi-icon-neutral" aria-hidden="true">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M21.21 15.89A10 10 0 1 1 8 2.83" />
+                      <path d="M22 12A10 10 0 0 0 12 2v10z" />
+                    </svg>
+                  </span>
+                </div>
+                <p id="analytics-top-category" class="insight-value">—</p>
+                <p id="analytics-top-category-sub" class="kpi-sub">No expenses recorded</p>
+              </article>
+
+              <article class="panel insight-card">
+                <div class="kpi-card-top">
+                  <p class="kpi-label">Average Expense</p>
+                  <span class="kpi-icon kpi-icon-expense" aria-hidden="true">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <circle cx="12" cy="12" r="10" />
+                      <path d="M12 8v4l2.5 2.5" />
+                    </svg>
+                  </span>
+                </div>
+                <p id="analytics-avg-expense" class="insight-value tabular-nums">₹0.00</p>
+                <p id="analytics-avg-expense-sub" class="kpi-sub">Per expense transaction</p>
+              </article>
+            </div>
+
+            <!-- Income vs Expenses Trend Chart (Full Width) -->
+            <article class="panel">
+              <div class="panel-header">
+                <div>
+                  <h2 class="panel-title">Monthly Income vs Expenses</h2>
+                  <p class="panel-subtitle">Hover any month to inspect exact INR cashflow and net surplus</p>
+                </div>
+                <div class="chart-legend">
+                  <span class="legend-item">
+                    <span class="legend-swatch swatch-income" aria-hidden="true"></span>
+                    Income
+                  </span>
+                  <span class="legend-item">
+                    <span class="legend-swatch swatch-expense" aria-hidden="true"></span>
+                    Expenses
+                  </span>
+                  <span class="legend-item">
+                    <span class="legend-line" aria-hidden="true"></span>
+                    Net
+                  </span>
+                </div>
+              </div>
+              <div id="analytics-bar-chart" class="chart-container bar-chart-container tall"></div>
+            </article>
+
+            <!-- Category Breakdown + Monthly Ledger Breakdown -->
+            <div class="analytics-split">
+              <article class="panel">
+                <div class="panel-header">
+                  <div>
+                    <h2 class="panel-title">Category-wise Expense Breakdown</h2>
+                    <p class="panel-subtitle">Select any category to inspect its transactions</p>
+                  </div>
+                </div>
+                <div id="analytics-category-breakdown"></div>
+              </article>
+
+              <article class="panel">
+                <div class="panel-header">
+                  <div>
+                    <h2 class="panel-title">Monthly Performance</h2>
+                    <p class="panel-subtitle">Month-by-month income, spending, and net savings</p>
+                  </div>
+                </div>
+                <div id="analytics-monthly-table"></div>
+              </article>
+            </div>
+          </section>
+        </main>
+      </div>
+    </div>
+
+    <!-- Add / Edit Transaction Modal -->
+    <div
+      id="transaction-modal"
+      class="modal-overlay"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="modal-title"
+      hidden
+    >
+      <div class="modal-card">
+        <div class="modal-header">
+          <div>
+            <h2 id="modal-title" class="modal-title">Add Transaction</h2>
+            <p class="modal-subtitle">Record an income or expense in Indian Rupees</p>
+          </div>
+          <button type="button" id="btn-close-modal" class="icon-btn" aria-label="Close modal">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 6 6 18" />
+              <path d="m6 6 12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <form id="transaction-form" novalidate>
+          <input type="hidden" id="tx-id" value="" />
+
+          <!-- Type Toggle -->
+          <div class="form-group">
+            <span class="form-label">Transaction Type</span>
+            <div class="type-toggle" role="group" aria-label="Select transaction type">
+              <button type="button" id="type-btn-expense" class="type-btn active" data-tx-type="expense">
+                Expense
+              </button>
+              <button type="button" id="type-btn-income" class="type-btn" data-tx-type="income">
+                Income
+              </button>
+            </div>
+          </div>
+
+          <!-- Description -->
+          <div class="form-group">
+            <label for="tx-description" class="form-label">Description</label>
+            <input
+              type="text"
+              id="tx-description"
+              class="input-control"
+              placeholder="e.g. Monthly Rent, BigBasket Groceries, Salary"
+              maxlength="80"
+              required
+            />
+            <p id="error-description" class="field-error" role="alert"></p>
+          </div>
+
+          <!-- Amount & Date -->
+          <div class="form-row">
+            <div class="form-group">
+              <label for="tx-amount" class="form-label">Amount (₹)</label>
+              <div class="currency-input-wrap">
+                <span class="currency-prefix" aria-hidden="true">₹</span>
+                <input
+                  type="number"
+                  id="tx-amount"
+                  class="input-control currency-input tabular-nums"
+                  placeholder="0.00"
+                  step="0.01"
+                  min="0.01"
+                  required
+                />
+              </div>
+              <p id="error-amount" class="field-error" role="alert"></p>
+            </div>
+
+            <div class="form-group">
+              <label for="tx-date" class="form-label">Date</label>
+              <input type="date" id="tx-date" class="input-control tabular-nums" required />
+              <p id="error-date" class="field-error" role="alert"></p>
+            </div>
+          </div>
+
+          <!-- Category -->
+          <div class="form-group">
+            <label for="tx-category" class="form-label">Category</label>
+            <select id="tx-category" class="input-control select-full" required></select>
+            <p id="error-category" class="field-error" role="alert"></p>
+          </div>
+
+          <!-- Optional Note -->
+          <div class="form-group">
+            <label for="tx-note" class="form-label">Note <span class="optional-label">(optional)</span></label>
+            <input
+              type="text"
+              id="tx-note"
+              class="input-control"
+              placeholder="e.g. Paid via UPI, HDFC Bank"
+              maxlength="120"
+            />
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" id="btn-cancel-modal" class="btn btn-secondary">Cancel</button>
+            <button type="submit" id="btn-submit-tx" class="btn btn-primary">Add Transaction</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Custom Confirmation Modal -->
+    <div
+      id="confirm-modal"
+      class="modal-overlay"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="confirm-title"
+      hidden
+    >
+      <div class="modal-card modal-sm">
+        <div class="modal-header">
+          <h2 id="confirm-title" class="modal-title">Confirm Action</h2>
+          <button type="button" id="btn-close-confirm" class="icon-btn" aria-label="Close confirmation">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 6 6 18" />
+              <path d="m6 6 12 12" />
+            </svg>
+          </button>
+        </div>
+        <p id="confirm-message" class="confirm-message"></p>
+        <div class="modal-footer">
+          <button type="button" id="btn-cancel-confirm" class="btn btn-secondary">Cancel</button>
+          <button type="button" id="btn-accept-confirm" class="btn btn-danger">Confirm</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Shared Floating Chart Tooltip -->
+    <div id="chart-tooltip" class="chart-tooltip" role="tooltip" hidden></div>
+
+    <!-- Toast Notifications Container -->
+    <div id="toast-container" class="toast-container" aria-live="polite" aria-atomic="true"></div>
+
+    <script type="module" src="/src/app.js"></script>
+  </body>
+</html>
